@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
@@ -89,6 +90,7 @@ type Config struct {
 type StorageApi struct {
 	oauth2Config  clientcredentials.Config
 	storageApiUrl string
+	backoff       backoff.BackOff
 }
 
 func NewStorageApi(ctx context.Context, config Config) (*StorageApi, error) {
@@ -103,6 +105,7 @@ func NewStorageApi(ctx context.Context, config Config) (*StorageApi, error) {
 			TokenURL:     tokenUrl,
 		},
 		storageApiUrl: config.StorageApiURL,
+		backoff:       backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3),
 	}, nil
 }
 
@@ -154,7 +157,9 @@ func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeade
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := backoff.RetryWithData[*http.Response](func() (*http.Response, error) {
+		return client.Do(req)
+	}, s.backoff)
 	if err != nil {
 		return UploadResponse{}, fmt.Errorf("failed to do request: %w", err)
 	}
@@ -191,7 +196,9 @@ func (s *StorageApi) Get(ctx context.Context, fileId string) (GetResponse, error
 		return GetResponse{}, fmt.Errorf("failed to set authorization header: %w", err)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := backoff.RetryWithData[*http.Response](func() (*http.Response, error) {
+		return client.Do(req)
+	}, s.backoff)
 	if err != nil {
 		return GetResponse{}, fmt.Errorf("failed to do request: %w", err)
 	}
@@ -228,7 +235,9 @@ func (s *StorageApi) Delete(ctx context.Context, fileId string) (DeleteResponse,
 		return DeleteResponse{}, fmt.Errorf("failed to set authorization header: %w", err)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := backoff.RetryWithData[*http.Response](func() (*http.Response, error) {
+		return client.Do(req)
+	}, s.backoff)
 	if err != nil {
 		return DeleteResponse{}, fmt.Errorf("failed to do request: %w", err)
 	}
