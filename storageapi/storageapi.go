@@ -16,6 +16,10 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
+type responseStatus string
+
+const statusOk responseStatus = "OK"
+
 type FileInfo struct {
 	FileExt      string `json:"file_ext"`
 	FileID       string `json:"file_id"`
@@ -28,10 +32,14 @@ type FileInfo struct {
 }
 
 type UploadResponse struct {
-	FileID  string   `json:"file_id"`
-	Info    FileInfo `json:"info"`
-	Message string   `json:"message"`
-	Status  string   `json:"status"`
+	FileID  string         `json:"file_id"`
+	Info    FileInfo       `json:"info"`
+	Message string         `json:"message"`
+	Status  responseStatus `json:"status"`
+}
+
+func (u UploadResponse) IsOk() bool {
+	return u.Status == statusOk
 }
 
 type UploadBody struct {
@@ -39,6 +47,16 @@ type UploadBody struct {
 	FileExt       string `json:"file_ext"`
 	FileMimetype  string `json:"mime_type"`
 	BinaryDataB64 string `json:"binary_data_b64"`
+}
+
+type GetResponse struct {
+	Data   string         `json:"data"`
+	Info   FileInfo       `json:"info"`
+	Status responseStatus `json:"status"`
+}
+
+func (u GetResponse) IsOk() bool {
+	return u.Status == statusOk
 }
 
 type Config struct {
@@ -144,6 +162,39 @@ func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeade
 	}
 
 	return uploadResponse, nil
+}
+
+func (s *StorageApi) Get(ctx context.Context, fileId string) (GetResponse, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("%s/d/files/%s", s.storageApiUrl, fileId)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return GetResponse{}, fmt.Errorf("failed to create request: %w", err)
+	}
+	if err := s.setAuthorizationHeader(ctx, req); err != nil {
+		return GetResponse{}, fmt.Errorf("failed to set authorization header: %w", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return GetResponse{}, fmt.Errorf("failed to do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return GetResponse{}, fmt.Errorf("failed to read response body: %w", err)
+		}
+		return GetResponse{}, fmt.Errorf("failed to get file by id: %s", string(body))
+	}
+
+	var getFileByIdResponse GetResponse
+	if err := json.NewDecoder(resp.Body).Decode(&getFileByIdResponse); err != nil {
+		return GetResponse{}, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return getFileByIdResponse, nil
 }
 
 func (s *StorageApi) detectMimeType(file multipart.File) (string, error) {
