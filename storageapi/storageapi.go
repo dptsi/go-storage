@@ -34,7 +34,7 @@ type FileInfo struct {
 type UploadResponse struct {
 	FileID  string         `json:"file_id"`
 	Info    FileInfo       `json:"info"`
-	Message string         `json:"message"`
+	Message string         `json:"message,omitempty"`
 	Status  responseStatus `json:"status"`
 }
 
@@ -50,9 +50,10 @@ type UploadBody struct {
 }
 
 type GetResponse struct {
-	Data   string         `json:"data"`
-	Info   FileInfo       `json:"info"`
-	Status responseStatus `json:"status"`
+	Data    string         `json:"data"`
+	Info    FileInfo       `json:"info"`
+	Message string         `json:"message,omitempty"`
+	Status  responseStatus `json:"status"`
 }
 
 func (u GetResponse) IsOk() bool {
@@ -62,7 +63,7 @@ func (u GetResponse) IsOk() bool {
 type DeleteResponse struct {
 	FileID  string         `json:"file_id"`
 	Info    FileInfo       `json:"info"`
-	Message string         `json:"message"`
+	Message string         `json:"message,omitempty"`
 	Status  responseStatus `json:"status"`
 }
 
@@ -172,6 +173,10 @@ func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeade
 		return UploadResponse{}, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	if !uploadResponse.IsOk() {
+		return UploadResponse{}, fmt.Errorf("failed to upload file: %s", uploadResponse.Message)
+	}
+
 	return uploadResponse, nil
 }
 
@@ -205,6 +210,10 @@ func (s *StorageApi) Get(ctx context.Context, fileId string) (GetResponse, error
 		return GetResponse{}, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	if !getFileByIdResponse.IsOk() {
+		return GetResponse{}, fmt.Errorf("failed to get file by id: %s", getFileByIdResponse.Message)
+	}
+
 	return getFileByIdResponse, nil
 }
 
@@ -236,6 +245,10 @@ func (s *StorageApi) Delete(ctx context.Context, fileId string) (DeleteResponse,
 	var deleteResponse DeleteResponse
 	if err := json.NewDecoder(resp.Body).Decode(&deleteResponse); err != nil {
 		return DeleteResponse{}, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if !deleteResponse.IsOk() {
+		return DeleteResponse{}, fmt.Errorf("failed to delete file: %s", deleteResponse.Message)
 	}
 
 	return deleteResponse, nil
