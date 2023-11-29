@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0](https://github.com/dptsi/go-storage/compare/v1.0.0...v1.1.0) (2023-11-29)
+
+
+### Features
+
+* **s3:** delete file ([d569ece](https://github.com/dptsi/go-storage/commit/d569ece13f606ee4ecc50746ada58b43cb251812))
+* **s3:** get file ([0749e37](https://github.com/dptsi/go-storage/commit/0749e371f91eb25d07cdb3ecaf2979d1606612cd))
+* **s3:** temporary public link ([fbf1af5](https://github.com/dptsi/go-storage/commit/fbf1af507c34a682b46f797dee6524368a5428d6))
+* **s3:** upload file ([e8ee587](https://github.com/dptsi/go-storage/commit/e8ee587c5b41254aa689e86d087759c0e445035d))
+
 ## 1.0.0 (2023-11-28)
 
 
