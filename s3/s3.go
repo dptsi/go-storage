@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cenkalti/backoff/v4"
 )
@@ -22,7 +23,6 @@ type FileInfo struct {
 	FileExt      string `json:"file_ext"`
 	FileID       string `json:"file_id"`
 	FileMimetype string `json:"file_mimetype"`
-	FileName     string `json:"file_name"`
 	FileSize     int    `json:"file_size"`
 	PublicLink   string `json:"public_link"`
 	ETag         string `json:"etag"`
@@ -41,6 +41,7 @@ type S3 struct {
 	session  *session.Session
 	backoff  backoff.BackOff
 	uploader *s3manager.Uploader
+	client   *s3.S3
 }
 
 func NewS3(ctx context.Context, config Config) (*S3, error) {
@@ -61,5 +62,6 @@ func NewS3(ctx context.Context, config Config) (*S3, error) {
 		session:  sess,
 		backoff:  backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3),
 		uploader: s3manager.NewUploader(sess),
+		client:   s3.New(sess),
 	}, nil
 }

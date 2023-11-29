@@ -27,12 +27,6 @@ func (u UploadResponse) IsOk() bool {
 func (s *S3) Upload(ctx context.Context, fileHeader *multipart.FileHeader) (UploadResponse, error) {
 	fileExt := filepath.Ext(fileHeader.Filename)
 
-	fileName := strings.TrimSuffix(fileHeader.Filename, fileExt)
-	fileName = strings.ReplaceAll(fileName, "/[^a-zA-Z0-9]+/", "_")
-	if fileName == "" {
-		fileName = fmt.Sprintf("undefined_%d", time.Now().Unix())
-	}
-
 	file, err := fileHeader.Open()
 	if err != nil {
 		return UploadResponse{}, fmt.Errorf("failed to open file: %w", err)
@@ -62,7 +56,6 @@ func (s *S3) Upload(ctx context.Context, fileHeader *multipart.FileHeader) (Uplo
 			FileExt:      fileExtWithoutDot,
 			FileID:       fileId,
 			FileMimetype: mime,
-			FileName:     fileName,
 			FileSize:     int(fileHeader.Size),
 			PublicLink:   result.Location,
 			ETag:         *result.ETag,
