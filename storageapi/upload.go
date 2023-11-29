@@ -16,6 +16,13 @@ import (
 	"github.com/cenkalti/backoff/v4"
 )
 
+type UploadResponse struct {
+	FileID  string         `json:"file_id"`
+	Info    FileInfo       `json:"info"`
+	Message string         `json:"message,omitempty"`
+	Status  responseStatus `json:"status"`
+}
+
 func (u UploadResponse) IsOk() bool {
 	return u.Status == statusOk
 }

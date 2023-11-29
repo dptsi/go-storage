@@ -59,10 +59,3 @@ func NewStorageApi(ctx context.Context, config Config) (*StorageApi, error) {
 		backoff:       backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 3),
 	}, nil
 }
-
-type UploadResponse struct {
-	FileID  string         `json:"file_id"`
-	Info    FileInfo       `json:"info"`
-	Message string         `json:"message,omitempty"`
-	Status  responseStatus `json:"status"`
-}
