@@ -1,13 +1,13 @@
-package storageapi
+package s3
 
 import (
-	"context"
 	"fmt"
-	"mime/multipart"
 	"net/http"
+
+	"github.com/dptsi/go-storage/contracts"
 )
 
-func (s *StorageApi) detectMimeType(file multipart.File) (string, error) {
+func (s *S3) detectMimeType(file contracts.File) (string, error) {
 	// Create a buffer to store the header of the file in
 	fileHeader := make([]byte, 512)
 
@@ -22,15 +22,4 @@ func (s *StorageApi) detectMimeType(file multipart.File) (string, error) {
 	}
 
 	return http.DetectContentType(fileHeader), nil
-}
-
-func (s *StorageApi) setAuthorizationHeader(ctx context.Context, req *http.Request) error {
-	token, err := s.oauth2Config.TokenSource(ctx).Token()
-	if err != nil {
-		return fmt.Errorf("failed to get token: %w", err)
-	}
-	req.Header.Set("x-client-id", s.oauth2Config.ClientID)
-	req.Header.Set("x-code", token.AccessToken)
-
-	return nil
 }

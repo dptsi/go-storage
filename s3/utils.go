@@ -2,12 +2,11 @@ package s3
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
-
-	"github.com/dptsi/go-storage/contracts"
 )
 
-func (s *S3) detectMimeType(file contracts.File) (string, error) {
+func (s *S3) detectMimeType(file multipart.File) (string, error) {
 	// Create a buffer to store the header of the file in
 	fileHeader := make([]byte, 512)
 

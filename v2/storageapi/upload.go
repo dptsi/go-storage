@@ -7,13 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/dptsi/go-storage/contracts"
 )
 
 type UploadResponse struct {
@@ -34,20 +31,7 @@ type UploadBody struct {
 	BinaryDataB64 string `json:"binary_data_b64"`
 }
 
-func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeader) (UploadResponse, error) {
-	fileExt := filepath.Ext(fileHeader.Filename)
-
-	fileName := strings.TrimSuffix(fileHeader.Filename, fileExt)
-	fileName = strings.ReplaceAll(fileName, "/[^a-zA-Z0-9]+/", "_")
-	if fileName == "" {
-		fileName = fmt.Sprintf("undefined_%d", time.Now().Unix())
-	}
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		return UploadResponse{}, fmt.Errorf("failed to open file: %w", err)
-	}
-	fileExtWithoutDot := strings.TrimPrefix(fileExt, ".")
+func (s *StorageApi) Upload(ctx context.Context, file contracts.File, name, ext string) (UploadResponse, error) {
 	mime, err := s.detectMimeType(file)
 	if err != nil {
 		return UploadResponse{}, fmt.Errorf("failed to detect mime type: %w", err)
@@ -61,8 +45,8 @@ func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeade
 	}
 
 	uploadBody := UploadBody{
-		FileName:      fileName,
-		FileExt:       fileExtWithoutDot,
+		FileName:      name,
+		FileExt:       ext,
 		FileMimetype:  mime,
 		BinaryDataB64: base64.StdEncoding.EncodeToString(fileBytes),
 	}
