@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/dptsi/go-storage/compare/v1.1.0...v2.0.0) (2023-12-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* upload file by using interface instead of concrete
+
+### Features
+
+* upload file by using interface instead of concrete ([f332ee1](https://github.com/dptsi/go-storage/commit/f332ee15bab8d224cbe494e14a300f2911f3bb59))
+
 ## [1.1.0](https://github.com/dptsi/go-storage/compare/v1.0.0...v1.1.0) (2023-11-29)
 
 
