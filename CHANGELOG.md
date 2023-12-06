@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/dptsi/go-storage/compare/v2.0.0...v2.0.1) (2023-12-06)
+
+
+### Bug Fixes
+
+* wrong method signature for s3 ([6954cae](https://github.com/dptsi/go-storage/commit/6954cae947bf7c511d6d11438421e6c860e36c7b))
+
 ## [2.0.0](https://github.com/dptsi/go-storage/compare/v1.1.0...v2.0.0) (2023-12-06)
 
 
