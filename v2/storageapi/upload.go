@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/dptsi/go-storage/contracts"
+	"github.com/dptsi/go-storage/v2/contracts"
 )
 
 type UploadResponse struct {

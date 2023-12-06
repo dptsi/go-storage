@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dptsi/go-storage/contracts"
+	"github.com/dptsi/go-storage/v2/contracts"
 )
 
 func (s *StorageApi) detectMimeType(file contracts.File) (string, error) {

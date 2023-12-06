@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cenkalti/backoff/v4"
-	"github.com/dptsi/go-storage/contracts"
+	"github.com/dptsi/go-storage/v2/contracts"
 	"github.com/google/uuid"
 )
 
