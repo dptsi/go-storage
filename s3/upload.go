@@ -1,15 +1,15 @@
 package s3
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"mime/multipart"
-	"path/filepath"
-	"strings"
+	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/dptsi/go-storage/contracts"
 	"github.com/google/uuid"
 )
 
@@ -24,14 +24,7 @@ func (u UploadResponse) IsOk() bool {
 	return u.Status == statusOk
 }
 
-func (s *S3) Upload(ctx context.Context, fileHeader *multipart.FileHeader) (UploadResponse, error) {
-	fileExt := filepath.Ext(fileHeader.Filename)
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		return UploadResponse{}, fmt.Errorf("failed to open file: %w", err)
-	}
-	fileExtWithoutDot := strings.TrimPrefix(fileExt, ".")
+func (s *S3) Upload(ctx context.Context, file contracts.File, name, ext string) (UploadResponse, error) {
 	mime, err := s.detectMimeType(file)
 	if err != nil {
 		return UploadResponse{}, fmt.Errorf("failed to detect mime type: %w", err)
@@ -53,14 +46,20 @@ func (s *S3) Upload(ctx context.Context, fileHeader *multipart.FileHeader) (Uplo
 	return UploadResponse{
 		FileID: fileId,
 		Info: FileInfo{
-			FileExt:      fileExtWithoutDot,
+			FileExt:      ext,
 			FileID:       fileId,
 			FileMimetype: mime,
-			FileSize:     int(fileHeader.Size),
+			FileSize:     s.getSize(file),
 			PublicLink:   result.Location,
 			ETag:         *result.ETag,
 			Timestamp:    time.Now().Format(time.RFC3339),
 		},
 		Status: statusOk,
 	}, nil
+}
+
+func (*S3) getSize(stream io.Reader) int {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.Len()
 }

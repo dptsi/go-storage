@@ -3,11 +3,12 @@ package storageapi
 import (
 	"context"
 	"fmt"
-	"mime/multipart"
 	"net/http"
+
+	"github.com/dptsi/go-storage/contracts"
 )
 
-func (s *StorageApi) detectMimeType(file multipart.File) (string, error) {
+func (s *StorageApi) detectMimeType(file contracts.File) (string, error) {
 	// Create a buffer to store the header of the file in
 	fileHeader := make([]byte, 512)
 
