@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type DeleteResponse struct {
@@ -17,8 +17,9 @@ func (u DeleteResponse) IsOk() bool {
 }
 
 func (s *S3) Delete(ctx context.Context, fileId string) (DeleteResponse, error) {
-	_, err := s.client.DeleteObject(&s3.DeleteObjectInput{
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: &s.bucket,
+		Key:    &fileId,
 	})
 	if err != nil {
 		return DeleteResponse{}, fmt.Errorf("failed to delete file, %v", err)

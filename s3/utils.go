@@ -2,11 +2,11 @@ package s3
 
 import (
 	"fmt"
-	"mime/multipart"
+	"io"
 	"net/http"
 )
 
-func (s *S3) detectMimeType(file multipart.File) (string, error) {
+func (s *S3) detectMimeType(file io.ReadSeeker) (string, error) {
 	// Create a buffer to store the header of the file in
 	fileHeader := make([]byte, 512)
 
