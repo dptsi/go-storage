@@ -10,7 +10,7 @@ You need to have Go installed on your machine. You can download it
 ## Installation
 
 ```bash
-go get github.com/dptsi/go-storage
+go get github.com/dptsi/go-storage/its
 ```
 
 ## Usage
