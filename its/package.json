@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "release": "commit-and-tag-version -t its/v --release-as 1.0.0"
+    "release": "commit-and-tag-version -t its/v"
   },
   "dependencies": {
     "commit-and-tag-version": "^12.0.0"
