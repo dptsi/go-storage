@@ -2,10 +2,10 @@ package s3
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 const publicLinkExpiration = 30 * time.Minute
@@ -20,19 +20,18 @@ func (u PublicLinkResponse) IsOk() bool {
 	return u.Status == statusOk
 }
 
-func (s *S3) PublicLink(ctx context.Context, fileId string) (PublicLinkResponse, error) {
-	req, _ := s.client.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: &s.bucket,
-		Key:    &fileId,
+func (s *S3) PublicLink(
+	ctx context.Context,
+	fileId string,
+) (string, error) {
+	request, err := s.presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(fileId),
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = publicLinkExpiration
 	})
-	url, err := req.Presign(publicLinkExpiration)
 	if err != nil {
-		return PublicLinkResponse{}, fmt.Errorf("failed to get public link, %v", err)
+		return "", err
 	}
-
-	return PublicLinkResponse{
-		Url:       url,
-		ExpiredAt: time.Now().Add(publicLinkExpiration).Format(time.RFC3339),
-		Status:    statusOk,
-	}, nil
+	return request.URL, err
 }

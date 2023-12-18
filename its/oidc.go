@@ -1,4 +1,4 @@
-package storageapi
+package its
 
 import (
 	"encoding/json"
