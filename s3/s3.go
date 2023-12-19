@@ -16,7 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const defaultPublicLinkExpiration = 30 * time.Minute
+const DefaultPublicLinkExpiration = 30 * time.Minute
 
 type Config struct {
 	Region          string
@@ -54,12 +54,17 @@ func NewS3(ctx context.Context, cfg Config) (*S3, error) {
 }
 
 func (s *S3) Upload(ctx context.Context, file io.ReadSeeker, name, ext string) (FileInfo, error) {
+	if _, err := file.Seek(0, 0); err != nil {
+		return FileInfo{}, fmt.Errorf("failed to seek file: %w", err)
+	}
 	mime, err := s.detectMimeType(file)
 	if err != nil {
 		return FileInfo{}, fmt.Errorf("failed to detect mime type: %w", err)
 	}
 
-	file.Seek(0, 0)
+	if _, err := file.Seek(0, 0); err != nil {
+		return FileInfo{}, fmt.Errorf("failed to seek file: %w", err)
+	}
 	fileId := uuid.NewString()
 	output, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: &s.bucket,
@@ -72,6 +77,9 @@ func (s *S3) Upload(ctx context.Context, file io.ReadSeeker, name, ext string) (
 	})
 	if err != nil {
 		return FileInfo{}, fmt.Errorf("failed to put object to s3: %w", err)
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		return FileInfo{}, fmt.Errorf("failed to seek file: %w", err)
 	}
 
 	return FileInfo{
@@ -110,6 +118,9 @@ func (s *S3) Download(ctx context.Context, fileId, path string) (*os.File, error
 
 	if _, err := io.Copy(file, output.Body); err != nil {
 		return nil, fmt.Errorf("failed to copy file to path %s: %w", path, err)
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		return nil, fmt.Errorf("failed to seek file: %w", err)
 	}
 
 	return file, nil
@@ -163,7 +174,7 @@ func (s *S3) PublicLink(
 	publicLinkExpiration time.Duration,
 ) (PublicLinkResponse, error) {
 	if publicLinkExpiration <= 0 {
-		publicLinkExpiration = defaultPublicLinkExpiration
+		publicLinkExpiration = DefaultPublicLinkExpiration
 	}
 	request, err := s.presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
