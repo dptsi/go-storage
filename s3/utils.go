@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,4 +22,10 @@ func (s *S3) detectMimeType(file io.ReadSeeker) (string, error) {
 	}
 
 	return http.DetectContentType(fileHeader), nil
+}
+
+func (*S3) getSize(stream io.Reader) int {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(stream)
+	return buf.Len()
 }
