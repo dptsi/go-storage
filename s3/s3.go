@@ -1,7 +1,9 @@
 package s3
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -82,7 +84,16 @@ func (s *S3) Upload(ctx context.Context, file io.ReadSeeker, name, ext string) (
 	}, nil
 }
 
-func (s *S3) DownloadAsFile(ctx context.Context, fileId, path string) (*os.File, error) {
+func (s *S3) UploadFromBase64(ctx context.Context, base64String, name, ext string) (FileInfo, error) {
+	data, err := base64.StdEncoding.DecodeString(base64String)
+	if err != nil {
+		return FileInfo{}, fmt.Errorf("failed to decode base64 string: %w", err)
+	}
+
+	return s.Upload(ctx, bytes.NewReader(data), name, ext)
+}
+
+func (s *S3) Download(ctx context.Context, fileId, path string) (*os.File, error) {
 	output, err := s.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(fileId),
@@ -104,7 +115,25 @@ func (s *S3) DownloadAsFile(ctx context.Context, fileId, path string) (*os.File,
 	return file, nil
 }
 
-func (s *S3) Get(ctx context.Context, fileId string) (FileInfo, error) {
+func (s *S3) DownloadAsBase64(ctx context.Context, fileId string) (string, error) {
+	output, err := s.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(fileId),
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to get object from s3: %w", err)
+	}
+	defer output.Body.Close()
+
+	buf := new(bytes.Buffer)
+	if _, err := io.Copy(buf, output.Body); err != nil {
+		return "", fmt.Errorf("failed to copy file to buffer: %w", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
+}
+
+func (s *S3) FileInfo(ctx context.Context, fileId string) (FileInfo, error) {
 	output, err := s.client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(fileId),
