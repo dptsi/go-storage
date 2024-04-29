@@ -206,7 +206,7 @@ func (s *S3) Delete(ctx context.Context, fileId string) error {
 }
 
 func (s *S3) SanitizeFileName(nameWithoutExt string) string {
-	nameWithoutExt = strings.ReplaceAll(nameWithoutExt, "/[^a-zA-Z0-9]+/", "_")
+	nameWithoutExt = strings.ReplaceAll(nameWithoutExt, "/[^a-zA-Z0-9-]+/", "_")
 	if nameWithoutExt == "" {
 		nameWithoutExt = fmt.Sprintf("undefined_%d", time.Now().Unix())
 	}
