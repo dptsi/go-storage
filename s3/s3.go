@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -201,4 +203,17 @@ func (s *S3) Delete(ctx context.Context, fileId string) error {
 	}
 
 	return nil
+}
+
+func (s *S3) SanitizeFileName(nameWithoutExt string) string {
+	nameWithoutExt = strings.ReplaceAll(nameWithoutExt, "/[^a-zA-Z0-9]+/", "_")
+	if nameWithoutExt == "" {
+		nameWithoutExt = fmt.Sprintf("undefined_%d", time.Now().Unix())
+	}
+
+	return nameWithoutExt
+}
+
+func (s *S3) GetFileExt(nameWithExt string) string {
+	return filepath.Ext(nameWithExt)
 }
