@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -38,7 +39,9 @@ func (s *StorageApi) Upload(ctx context.Context, fileHeader *multipart.FileHeade
 	fileExt := filepath.Ext(fileHeader.Filename)
 
 	fileName := strings.TrimSuffix(fileHeader.Filename, fileExt)
-	fileName = strings.ReplaceAll(fileName, "/[^a-zA-Z0-9-]+/", "_")
+	rgx := regexp.MustCompile(`[^a-zA-Z0-9]+`)
+	fileNameByte := rgx.ReplaceAll([]byte(fileName), []byte(""))
+	fileName = string(fileNameByte)
 	if fileName == "" {
 		fileName = fmt.Sprintf("undefined_%d", time.Now().Unix())
 	}
