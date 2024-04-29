@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.2](https://github.com/dptsi/go-storage/compare/its/v1.0.1...its/v1.0.2) (2024-04-29)
+
+
+### Bug Fixes
+
+* **its:** can't upload file with name contains non-alphanumeric characters ([6c7b2da](https://github.com/dptsi/go-storage/commit/6c7b2da80ba9c698f520f3f8645e9261c7934897))
+
 ## [1.0.1](https://github.com/dptsi/go-storage/compare/its/v1.0.0...its/v1.0.1) (2024-04-29)
 
 
