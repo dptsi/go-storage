@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.2](https://github.com/dptsi/go-storage/compare/s3/v1.1.1...s3/v1.1.2) (2024-04-29)
+
+
+### Bug Fixes
+
+* wrong regex for sanitizing file name ([9c7625d](https://github.com/dptsi/go-storage/commit/9c7625d330555b682669cf604f8b0f38a1fc8a92))
+
 ## [1.1.1](https://github.com/dptsi/go-storage/compare/s3/v1.1.0...s3/v1.1.1) (2024-04-29)
 
 
