@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "release": "commit-and-tag-version -t gcs/v"
+  },
+  "dependencies": {
+    "commit-and-tag-version": "^12.0.0"
+  },
+  "private": true,
+  "version": "1.0.0"
+}
